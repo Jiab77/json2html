@@ -3,8 +3,8 @@ JSON to HTML converter - It will follow the same spec as http://json2html.com/
 
 ## Available Versions
 I wrote two versions:
- * a `PHP` version **working**
- * a `Python` version **fix needed**
+ * a `PHP` version **(working)**
+ * a `Python` version **(fix needed)**
 
 ### PHP version
 Just include the file `json2html.php` into your code.
