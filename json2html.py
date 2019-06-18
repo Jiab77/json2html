@@ -34,7 +34,7 @@ class json2html:
 
 				self.buffer[] = ['iteration' = self.iterations, 'tag' = value]
 
-			elif (key == 'alt' or key == 'class' or key == 'id' or key == 'src'):
+			elif (key == 'alt' or key == 'class' or key == 'id' or key == 'src' or key == 'href' or key == 'target' or key == 'name' or key == 'action' or key == 'method' or key == 'style'):
 				if (debug == True):
 					print('Converted to: {} = {}\n', key, value)
 				
