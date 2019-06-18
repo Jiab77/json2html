@@ -57,6 +57,12 @@ class json2html
 				case 'class':
 				case 'id':
 				case 'src':
+				case 'href':
+				case 'target':
+				case 'name':
+				case 'action':
+				case 'method':
+				case 'style':
 					if ($debug === true) {
 						echo 'Converted to: ' . $key . '="' . $value . '"' . PHP_EOL;
 					}
