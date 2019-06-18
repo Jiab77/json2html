@@ -10,7 +10,7 @@ I wrote two versions:
 Just include the file `json2html.php` into your code.
 
 ```php
-require_once 'json2html.php'
+require_once 'json2html.php';
 
 # your code
 ```
@@ -18,7 +18,7 @@ require_once 'json2html.php'
 And use it that way:
 
 ```php
-require_once 'json2html.php'
+require_once 'json2html.php';
 
 /*
  *
