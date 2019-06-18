@@ -1,5 +1,5 @@
 # JSON2HTML
-JSON to HTML converter - It will follow the same spec as http://json2html.com/
+JSON to HTML converter - It will follow the same spec as http://json2html.com/examples/
 
 ## Available Versions
 I wrote two versions:
