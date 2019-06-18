@@ -58,6 +58,9 @@ $payload = '{"<>":"div","class":"${class}", "id":"${id}","html":[{"<>":"img", "s
 
 /* data sample 3 */
 $data = '[{"class":"card"}, {"id":"' . uniqid() . '"}, {"src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '"}, {"alt":"this is our logo"}, {"name":"Jo"}]';
+
+/* invalid data sample */
+/* HTML attributes in 'data' object must be written in the same order as the given markup in 'payload' */
 // $data = '[{"id":"' . uniqid() . '"}, {"class":"card"}, {"src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '"}, {"alt":"this is our logo"}, {"name":"Jo"}]';
 
 /* Apply transform to get HTML output */
@@ -88,6 +91,22 @@ You can use `child`, `children` or `html` to define child elements.
 
 Will give:
  * `<a href="https://example.com" target="_blank"><img alt="alternative text" src="image_src"></a>`
+
+### It can be run from console too
+From your favorite shell using with no args:
+
+```bash
+$ php -f json2html.php
+
+Received:
+string(152) "{"<>":"div","class":"${class}", "id":"${id}","html":[{"<>":"img", "src":"${src}","alt":"${alt}"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"}]}"
+string(150) "[{"class":"card"}, {"id":"5d0839d3c5824"}, {"src":"https://picsum.photos/id/767/400?random=5d0839d3c5864"}, {"alt":"this is our logo"}, {"name":"Jo"}]"
+
+Converted:
+string(166) "<div class="card" id="5d0839d3c5824"><img src="https://picsum.photos/id/767/400?random=5d0839d3c5864" alt="this is our logo"><p>Hi Jo! Welcome to json2html!</p></div>"
+```
+
+> Arguments are not supported yet.
 
 ## Python version
 More details once patched and finished.
