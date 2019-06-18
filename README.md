@@ -82,6 +82,8 @@ Will give:
  * `<p>&lt;code&gt;will be converted into HTML entities&lt;/code&gt;</p>`
 
 ### Support for `child` elements included
+You can use `child`, `children` or `html` to define child elements.
+
  * `{"<>":"a","href":"https://example.com","target":"_blank","html":[{"<>":"img","alt":"alternative text","src":"image_src"}]}`
 
 Will give:
