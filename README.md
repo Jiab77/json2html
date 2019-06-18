@@ -6,7 +6,7 @@ I wrote two versions:
  * a `PHP` version **(working)**
  * a `Python` version **(fix needed)**
 
-### PHP version
+## PHP version
 Just include the file `json2html.php` into your code.
 
 ```php
@@ -64,7 +64,30 @@ $data = '[{"class":"card"}, {"id":"' . uniqid() . '"}, {"src":"https://picsum.ph
 json2html::transform($payload, $data, false); // Payload, Data, Debug (true | false)
 ```
 
-### Python version
+### Supported `tag` identifiers
+It can handle both `{"<>":"div"}` or `{"tag":"div"}`.
+
+### Support most common `HTML` attributes
+Example:
+ * `{"<>":"div","class":"css_class","id":"html_id"}` gives `<div class="css_class" id="html_id"></div>`
+ * `{"<>":"img","alt":"alternative text","src":"image_src"}` gives `<img alt="alternative text" src="image_src">`
+ * `{"<>":"a","href":"https://example.com","target":"_blank"}` gives `<a href="https://example.com" target="_blank"></a>`
+
+### Support `text` and `HTML` encoding
+ * `{"<>":"p","text":"my new paragraph."}` *(will be text encoded and HTML tags stripped and HTML entities decoded)*
+ * `{"<>":"p","html":"<code>will be converted into HTML entitites</code>"}` *(will be HTML encoded and HTML tags conserved)*
+
+Will give:
+ * `<p>my new paragraph.</p>`
+ * `<p>&lt;code&gt;will be converted into HTML entities&lt;/code&gt;</p>`
+
+### Support for `child` elements included
+ * `{"<>":"a","href":"https://example.com","target":"_blank","html":[{"<>":"img","alt":"alternative text","src":"image_src"}]}`
+
+Will give:
+ * `<a href="https://example.com" target="_blank"><img alt="alternative text" src="image_src"></a>`
+
+## Python version
 More details once patched and finished.
 
 ## Contribute
