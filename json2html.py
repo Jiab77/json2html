@@ -33,193 +33,233 @@ class json2html:
 	MARKERS = ('{{}}', '${}')
 	DEBUG = False
 	DATA = None
+	DISPLAY_PROPERTIES = False
 
 	iterations = 0
+	childs = 0
 	buffer = []
-	cli = False
 	html = ''
 	props = []
 
-	is_array = lambda var: isinstance(var, (list, tuple))
+	@staticmethod
+	def in_array(needle, haystack):
+		if (needle in haystack):
+			return True
+		return False
+	
+	@staticmethod
+	def is_array(needle):
+		return isinstance(needle, (list, tuple))
 
 	@staticmethod
-	def _convert(decoded_tags, debug):
-		nonlocal iterations
-		nonlocal buffer
-		nonlocal html
-		nonlocal props
-		nonlocal SELF_CLOSING_TAGS
-		
+	def is_string(needle):
+		return isinstance(needle, str)
+
+	@staticmethod
+	def contains(needle, string):
+		if (string.find(needle) == -1):
+			return False
+		return True
+	
+	@classmethod
+	def _convert(cls, decoded_tags, debug):
 		# Init internal counter
-		iterations += 1
+		cls.iterations += 1
 		if (debug == True):
-			print('Iteration:', iterations + '\n')
+			print('\n* Iteration:', cls.iterations)
 		
 		# Parse given tags
 		for (key, value) in decoded_tags.items():
 			if (key == 'tag' or key == '<>'):
+				cls.buffer.append({'iteration': cls.iterations, 'tag': value})
 				if (debug == True):
-					print('Converted [{}] to: <{}>\n', value, value)
-					print('is self closing tag:', 'true' if value in SELF_CLOSING_TAGS else 'false')
-
-				buffer.append({'iteration': iterations, 'tag': value})
+					print('Converted [' + value + '] to: <' + value + '>')
+					print('is self closing tag:', 'true' if value in cls.SELF_CLOSING_TAGS else 'false')
 
 			elif (key == 'alt' or key == 'class' or key == 'id' or key == 'src' or key == 'href' or key == 'target' or key == 'name' or key == 'action' or key == 'method' or key == 'style'):
+				cls.props.append({'iteration': cls.iterations, 'attribute': key + '="' + value + '"'})
 				if (debug == True):
-					print('Converted to: {} = {}\n', key, value)
-				
-				props.append({'iteration': iterations, 'attribute': key + '="' + value + '"'})
+					print('Converted to: ' + key + ' = "' + value + '"')
 			
 			elif (key == 'child' or key == 'children' or key == 'html'):
-				if (is_array(value)):
-					for html_tags in value.values():
-						json2html._convert(html_tags, debug)
+				if (cls.is_array(value)):
+					for html_tags in value:
+						cls._convert(html_tags, debug)
 				else:
+					cls.props.append({'iteration': cls.iterations, 'content': value})
 					if (debug == True):
-						print('Converted to: innerHTML="{}"\n', value)
-					
-					props.append({'iteration': iterations, 'content': value})
+						print('Converted to: innerHTML="' + value + '"')
 			
 			elif (key == 'text'):
+				cls.props.append({'iteration': cls.iterations, 'content': value})
 				if (debug == True):
-					print('Converted to: innerText="{}"\n', value)
+					print('Converted to: innerText="' + value + '"')
 				
-				props.append({'iteration': iterations, 'content': value})
-			
 			else:
-				print('Unsupported tag given. Got: "{}"\n', key)
+				print('Unsupported tag given. Got: "' + key + '"\n')
 				return False
 	
-	@staticmethod
-	def _merge():
-		nonlocal buffer
-		nonlocal props
-		nonlocal html
-
+	@classmethod
+	def _merge(cls, debug):
 		# Loop on tags
 		i = 0
-		while i <= len(buffer)-1:
+		while i <= len(cls.buffer)-1:
+			# Debug pass
+			if (debug == True):
+				print('Pass:', i)
+
 			# Open tag
-			html += '<' + buffer[i]['tag']
+			cls.html += '<' + cls.buffer[i]['tag']
+
+			# Reading props
+			if (debug == True):
+				print('Props:', cls.props)
 
 			# Adding attributes
-			j = 0
-			while j <= len(props)-1:
-				if (props[j]['iteration'] == props[i]['iteration']):
-					html += ' ' + props[j]['attribute'] if 'attribute' in props[j] else ''
-				
-				# Increment counter
-				j += 1
-			
+			for j in range(0, len(cls.props)):
+				if (cls.props[j]['iteration'] == cls.props[i]['iteration']):
+					# print('J:A:', cls.props[j]['iteration'], '==', 'I:A:', cls.props[i]['iteration'])
+					cls.html += ' ' + cls.props[j]['attribute'] if 'attribute' in cls.props[j] else ''
+					
 			# Closing open tag
-			html += '>'
+			cls.html += '>'
 
 			# Adding content
-			j = 0
-			while j <= len(props)-1:
-				if (props[j]['iteration'] == props[i]['iteration']):
-					html += props[j]['content'] if 'content' in props[j] else ''
-				
-				# Increment counter
-				j += 1
+			for k in range(0, len(cls.props)):
+				if (cls.props[k]['iteration'] == cls.props[i]['iteration']):
+					# print('K:C:', cls.props[k]['iteration'], '==', 'I:C:', cls.props[i]['iteration'])
+					cls.html += cls.props[k]['content'] if 'content' in cls.props[k] else ''
 			
-			# Increment counter
+			# Remove consumed props[i] (passed around 3 hours on that crap!!)
+			del cls.props[i]
+
+			# Increment tag open counter
 			i += 1
 
 		# Close tag
-		i = len(buffer)-1
+		i = len(cls.buffer)-1
 		while i >= 0:
-			if (in_array(buffer[i]['tag'], SELF_CLOSING_TAGS) == False):
-				html += '</' + buffer[i]['tag'] + '>'
+		# for i in range(0, len(cls.buffer)):
+			if (cls.in_array(cls.buffer[i]['tag'], cls.SELF_CLOSING_TAGS) == False):
+				cls.html += '</' + cls.buffer[i]['tag'] + '>'
 			
-			# Deincrement counter
+			# Deincrement tag close counter
 			i -= 1
 
-	@staticmethod
-	def _replace(html, data, marker, debug):
-		nonlocal MARKERS
+	@classmethod
+	def _replace(cls, html, data, marker, debug):
+		# Additional debug infos
+		if (debug == True):
+			print('Data:', data)
+			print('Used marker:', marker)
 
 		# Validate given marker
-		if (in_array(marker, MARKERS)):
+		if (cls.in_array(marker, cls.MARKERS)):
 			if (marker == '{{}}'):
-				regex = r'/({{)(\w*)(}})(\w*)/m'
+				regex = r"({{)(\w*)(}})(\w*)"
 			elif (marker == '${}'):
-				regex = r'/(\${)(\w*)(})(\w*)/m'
+				regex = r"(\${)(\w*)(})(\w*)"
 		else:
 			print('Unsupported marker given.\n')
 			return False
 
 		# Apply changes
-		matches = re.finditer(regex, html, 0)
-		if (len(matches) > 0):
-			count = len(matches)
+		matches = re.finditer(regex, html, re.MULTILINE)
+		if (debug == True):
+			print('Used regex:', regex)
+			print('Search in:', html)
+			print('Results:', matches)
 
-			if (debug == True):
-				print(matches)
+		if (matches):
+			## Loop on matches
+			index = 0
+			for matchNum, match in enumerate(matches, start=1):
+				if (debug == True):
+					print ("Match {matchNum} was found at {start}-{end}: {match}".format(matchNum = matchNum, start = match.start(), end = match.end(), match = match.group()))
+				cls.html = cls.html.replace(match.group(), data[index][match.group(2)])
+
+				## Increment data counter
+				index += 1
 			
-			if (count == len(data)):
-				index = 0
-				for match in matches:
-					if (match[2] != '' and isinstance(match[2], str)):
-						html = html.replace(match[0], data[index][match[2]])
-						index += 1
+				""" for groupNum in range(0, len(match.groups())):
+					groupNum = groupNum + 1
+					print ("Group {groupNum} found at {start}-{end}: {group}".format(groupNum = groupNum, start = match.start(groupNum), end = match.end(groupNum), group = match.group(groupNum))) """
 		else:
 			print('Failed to process data.\n')
 			return False
 	
-	@staticmethod
-	def transform(tags, data = DATA, debug = DEBUG, marker = DEFAULT_MARKER):
-		if (tags != ''):
-			if (isinstance(tags, str)):
-				nonlocal buffer
-				nonlocal props
-				nonlocal html
+	@classmethod
+	def transform(cls, tags, data = None, debug = None, marker = None):
+		# Save state
+		encoded_tags = tags
+		encoded_data = data
 
-				# Decode stuff
-				tags = tags.decode().encode('UTF-8')
-				decoded_tags = json.loads(tags)
-				if (data != None):
-					data = data.decode().encode('UTF-8')
-					decoded_data = json.loads(data)
+		# Assign default props
+		if (data == None):
+			data = cls.DATA
+		
+		if (debug == None):
+			debug = cls.DEBUG
+		
+		if (marker == None):
+			marker = cls.DEFAULT_MARKER
+
+		# Check if you we got tags to process
+		if (encoded_tags != ''):
+			# Check given tags type
+			if (cls.is_string(encoded_tags)):
+				# Decode tags
+				decoded_tags = json.loads(encoded_tags)
+
+				# Decode data
+				if (encoded_data != None):
+					decoded_data = json.loads(encoded_data)
 				else:
-					decoded_data = data
+					decoded_data = encoded_data
 				
 				# Check decoding result
 				if (decoded_tags):
+					if (debug == True):
+						if (cls.DISPLAY_PROPERTIES == True):
+							print('\n* Decoded tags:\n', decoded_tags, '\n\n ==> Properties:\n', dir(decoded_tags))
+							print('\n* Decoded data:\n', decoded_data, '\n\n ==> Properties:\n', dir(decoded_data))
+						else:
+							print('\n* Decoded tags:\n', decoded_tags)
+							print('\n* Decoded data:\n', decoded_data)
+						print('\nConverting...')
+					
 					# Convert tags
-					if (debug == True):
-						print('\nDecoded:\n')
-						print(dir(decoded_tags))
-						print(dir(decoded_data))
-						print('\nConverting...\n')
-					
-					json2html._convert(decoded_tags, debug)
+					cls._convert(decoded_tags, debug)
 
-					# Merge buffer and props
+					# Display memory info
 					if (debug == True):
-						print('\nBuffer:\n')
-						pprint.pprint(buffer)
-						print('\nProps:\n')
-						pprint.pprint(props)
-						print('\nMergin...\n')
+						print('\n* Buffer:', len(cls.buffer), '\n')
+						pprint.pprint(cls.buffer)
+						print('\n* Props:', len(cls.props), '\n')
+						pprint.pprint(cls.props)
+						print('\nMerging...\n')
 					
-					json2html._merge()
+					# Merge buffer and props
+					cls._merge(debug)
 
 					# Parse given data
 					if (decoded_data != None):
 						if (debug == True):
-							print('Adding data...\n')
-						
-						json2html._replace(html, decoded_data, marker, debug)
-					
+							print('\nAdding data...\n')
+						cls._replace(cls.html, decoded_data, marker, debug)
+
 					# Output result
-					return html
+					return cls.html
+				
+				# Return error
 				else:
-					print(dir(decoded_tags))
-					print(dir(data))
+					print('Failed to parse tags/data.')
+					if (debug == True):
+						print(dir(decoded_tags))
+						print(dir(data))
 					return False
 			else:
-				print('Tags must be a string. {} given.', type(tags).__name__.capitalize())
+				print('Tags must be a string. ' + type(tags).__name__.capitalize() + ' given.')
 				return False
 		else:
 			print('Empty tags given.')
