@@ -33,7 +33,6 @@ class json2html
 
 	private static $iterations = 0;
 	private static $buffer = [];
-	private static $cli = false;
 	private static $html = '';
 	private static $props = [];
 
@@ -46,13 +45,6 @@ class json2html
 		if (!extension_loaded('json')) {
 			echo 'Extension json not loaded.';
 			return false;
-		}
-	}
-
-	private static function _check_sapi()
-	{
-		if (substr(PHP_SAPI, 0, 3) !== 'cgi') {
-			self::$cli = true;
 		}
 	}
 	
@@ -209,13 +201,6 @@ class json2html
 			if (is_string($tags)) {
 				// Check internals
 				self::_check_extensions();
-				self::_check_sapi();
-
-				// Output internal debug on CLI
-				if (self::$cli === true) {
-					echo 'Received:' . PHP_EOL;
-					var_dump($tags, $data);
-				}
 
 				// Decode stuff
 				$tags = mb_convert_encoding($tags, 'UTF-8');
@@ -256,17 +241,16 @@ class json2html
 						self::_replace(self::$html, $decoded_data, $marker, $debug);
 					}
 
-					// Output internal debug on CLI
-					if (self::$cli === true) {
-						echo PHP_EOL . 'Converted:' . PHP_EOL;
-						var_dump(self::$html);
-					}
-
 					// Output result
 					return self::$html;
 				}
+
+				// Return error
 				else {
-					var_dump($decoded_tags, json_last_error(), json_last_error_msg(), $data);
+					echo 'Failed to parse tags/data.';
+					if ($debug === true) {
+						var_dump($decoded_tags, json_last_error(), json_last_error_msg(), $data);
+					}
 					return false;
 				}
 			}
@@ -281,18 +265,3 @@ class json2html
 		}
 	}
 }
-
-// Test payload / data
-// $payload = '{"<>":"div","class":"card", "id":"' . uniqid() . '","html":[{"<>":"img", "src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '","alt":"this is our logo"},{"<>":"p","text":"Hi {{name}}! Welcome to json2html!"}]}';
-// $payload = '{"<>":"div","class":"{{class}}", "id":"' . uniqid() . '","html":[{"<>":"img", "src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '","alt":"this is our logo"},{"<>":"p","text":"Hi {{name}}! Welcome to json2html!"}]}';
-// $payload = '{"<>":"div","class":"${class}", "id":"' . uniqid() . '","html":[{"<>":"img", "src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '","alt":"this is our logo"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"}]}';
-$payload = '{"<>":"div","class":"${class}", "id":"${id}","html":[{"<>":"img", "src":"${src}","alt":"${alt}"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"}]}';
-// $payload = ['x', 'y'];
-// $payload = new stdClass;
-
-// $data = '[{"name":"Jo"}]';
-// $data = '[{"class":"card"}, {"name":"Jo"}]';
-$data = '[{"class":"card"}, {"id":"' . uniqid() . '"}, {"src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '"}, {"alt":"this is our logo"}, {"name":"Jo"}]';
-// $data = '[{"id":"' . uniqid() . '"}, {"class":"card"}, {"src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '"}, {"alt":"this is our logo"}, {"name":"Jo"}]';
-
-json2html::transform($payload, $data, false);
