@@ -325,7 +325,7 @@ def main():
 	# payload = '{"<>":"div","class":"card", "id":"8465416541651365132","html":[{"<>":"img", "src":"https://picsum.photos/id/82/400?random=54654654654","alt":"this is our logo"},{"<>":"p","text":"Hi {{name}}! Welcome to json2html!"}]}'
 	# payload = '{"<>":"div","class":"{{class}}", "id":"8465416541651365132","html":[{"<>":"img", "src":"https://picsum.photos/id/82/400?random=54654654654","alt":"this is our logo"},{"<>":"p","text":"Hi {{name}}! Welcome to json2html!"}]}'
 	# payload = '{"<>":"div","class":"${class}", "id":"8465416541651365132","html":[{"<>":"img", "src":"https://picsum.photos/id/82/400?random=54654654654","alt":"this is our logo"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"}]}'
-	payload = '{"<>":"div","class":"${class}", "id":"${id}","html":[{"<>":"img", "src":"${src}","alt":"${alt}"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"}]}'
+	payload = '{"<>":"div","class":"${class}", "id":"${id}","html":[{"<>":"img", "src":"${src}","alt":"${alt}"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"},{"<>":"p","text":"Awesome it works!"}]}'
 
 	# Test data
 	# fail result

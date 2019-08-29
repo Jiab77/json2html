@@ -296,7 +296,8 @@ class json2html
 // $payload = '{"<>":"div","class":"card", "id":"' . uniqid() . '","html":[{"<>":"img", "src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '","alt":"this is our logo"},{"<>":"p","text":"Hi {{name}}! Welcome to json2html!"}]}';
 // $payload = '{"<>":"div","class":"{{class}}", "id":"' . uniqid() . '","html":[{"<>":"img", "src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '","alt":"this is our logo"},{"<>":"p","text":"Hi {{name}}! Welcome to json2html!"}]}';
 // $payload = '{"<>":"div","class":"${class}", "id":"' . uniqid() . '","html":[{"<>":"img", "src":"https://picsum.photos/id/' . mt_rand(0, 999) . '/400?random=' . uniqid() . '","alt":"this is our logo"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"}]}';
-$payload = '{"<>":"div","class":"${class}", "id":"${id}","html":[{"<>":"img", "src":"${src}","alt":"${alt}"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"}]}';
+// $payload = '{"<>":"div","class":"${class}", "id":"${id}","html":[{"<>":"img", "src":"${src}","alt":"${alt}"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"}]}';
+$payload = '{"<>":"div","class":"${class}", "id":"${id}","html":[{"<>":"img", "src":"${src}","alt":"${alt}"},{"<>":"p","text":"Hi ${name}! Welcome to json2html!"},{"<>":"p","text":"Awesome it works!"}]}';
 
 // Test data
 // fail result
